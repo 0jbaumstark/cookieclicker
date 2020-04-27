@@ -3,8 +3,7 @@ from kivy.lang import Builder
 from kivy.properties import StringProperty
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.widget import Widget
-from kivy import clockformatting = """
+from kivy.uix.widget import Widgetformatting = """
 <MyScreenManager>:
     StartScreen:
     CreateNewCharacterScreen:
@@ -13,7 +12,7 @@ from kivy import clockformatting = """
     BoxLayout:
         orientation: 'vertical'
         Label:
-            color: [218, 10, 17, 1]
+            color: [1,0,0,1]
             text: root.instructions  
             font_size: 40 
         TextInput:
@@ -38,48 +37,10 @@ from kivy import clockformatting = """
     name: 'game'
     BoxLayout:
         orientation: 'vertical'
+        Label:
+            id: display
+            text: root.display
         BoxLayout:
-            orientation: 'horizontal'
-            Label:
-                id: stuff_we_own
-                text: root.owned
-            Label:
-                id: display
-                text: root.display
-            BoxLayout:
-                id: infoboxes
-                orientation: 'vertical'
-                BoxLayout:
-                    id: infobox_1
-                    orientation: 'horizontal'
-                    Label:
-                        id: adsnum
-                        text: "Number of ads: " + root.ads
-                    Button:
-                        id: adsprice
-                        text: "Buy an ad for: " + root.ads_price
-                        on_press: root.buy_ad()                BoxLayout:
-                    id: infobox_2
-                    orientation: 'horizontal'                   
-                    Label:
-                        text: "Middle Owned"
-                    Button:
-                        text: "Button Middle"   
-                BoxLayout:
-                    id: infobox_4
-                    orientation: 'horizontal'                   
-                    Label:
-                        text: "Middle2 Owned"
-                    Button:
-                        text: "Button Middle2"                               BoxLayout:
-                    id: infobox_3
-                    orientation: 'horizontal'    
-                    Label:
-                        text: "Bottom Owned"   
-                    Button:
-                        text: "Button Bottom"    
-        BoxLayout:
-            orientation: 'horizontal'
             Button:
                 text: 'Read a Book'
                 on_press: root.read_a_book()
@@ -87,63 +48,29 @@ from kivy import clockformatting = """
             Button:
                 text: 'Workout'
                 on_press: root.workout() 
-                on_press: root.add_time(15)  
-            Button:
-                text: 'Job work' 
-                on_press: root.get_paid()
-                on_press: root.add_time(50)             
+                on_press: root.add_time(15)            
 """
-Builder.load_string(formatting)class PlayerStatistics:    def __init__(self, strength=0, wisdom=0, time=0, ascension=0, jtier=10, liquidfunds=1000, myads=0):
-        self.wallet = liquidfunds
-        self.jobtier = jtier
-        self.ascension = ascension
+Builder.load_string(formatting)class PlayerStatistics:    def __init__(self, strength=0, wisdom=0, time=0):
         self.time: int = time
         self.name: str = ""
         self.strength: int = strength
         self.wisdom: int = wisdom
-        self.attributeDict = {"STR": self.strength, "WIS": self.wisdom}
-        self.ads = myads    def create_from_save(self):
+        self.attributeDict = {"STR": self.strength, "WIS": self.wisdom}    def create_from_save(self):
         pass    def set_name(self, username):
         self.name = username    def increment_Strength(self, amount=1):
         self.strength = self.strength + amount    def increment(self, parameter, amount=1):
         if self.attributeDict.__contains__(parameter):
             self.attributeDict[parameter] = self.attributeDict[parameter] + amount
         else:
-            print("That Parameter does not exist")    def next_ads_price(self):
-        return self.ads + 0.1 * self.ads    def increment_Wisdom(self, amount=1):
+            print("That Parameter does not exist")    def increment_Wisdom(self, amount=1):
         self.wisdom = self.wisdom + amount
         pass    def __str__(self):
         return str(
             "Name: " + self.name + "|" + "time: " + str(self.time)
             + "\n" + "Strength: " + str(self.strength)
             + "\n" + "Wisdom: " + str(self.wisdom)
-            + "\n" + "$" + str(self.wallet)
         )    def increment_Time(self, amount=1):
-        #ads
-        if self.time%50==0:
-            #add money to wallet from ad revenue
-            self.wallet = self.wallet + self.ads*5        self.time = self.time + amount
-        pass    def get_paid(self):
-        paycheck = self.calculate_paycheck()
-        self.wallet = self.wallet + paycheck
-        pass    def calculate_paycheck(self):
-        strength_modifier = .000001
-        wisdom_modifier = .00001
-        asc_modifier = (self.ascension + .1)
-        money_from_strength = (self.strength * strength_modifier * asc_modifier)
-        money_from_wisdom = self.wisdom * wisdom_modifier * asc_modifier
-        paycheck = self.jobtier * (money_from_strength + money_from_wisdom)
-        return paycheck    def increment_ads(self):
-        # Check if we have enough money
-        price = self.next_ads_price()
-        if self.wallet > price:
-            # If we do, then remove from wallet
-            self.wallet = self.wallet - price
-            # add the ad
-            self.ads = self.ads + 1
-            # print("Incremented an add, total ads: " + str(self.ads))
-        else:
-            pass
+        self.time = self.time + amount
         pass# Create the screen manager = sm
 class MyScreenManager(ScreenManager, Widget):
     data = ObjectProperty(PlayerStatistics)class StartScreen(Screen):
@@ -175,23 +102,11 @@ class MyScreenManager(ScreenManager, Widget):
             self.data_stats = PlayerStatistics()
             self.data_stats.set_name(username)
             self.manager.get_screen('game').display = str(self.data_stats)
-            self.manager.get_screen('game').adsnum = str(self.data_stats.ads)
-            self.manager.get_screen('game').adsprice = str(self.data_stats.next_ads_price())
             self.manager.current = 'game'
         else:
             self.instructions = self.fail_instructions
         pass    passclass MainGameScreen(Screen):    def get_data(self) -> PlayerStatistics:
-        return self.manager.get_screen('character').data_stats    display = StringProperty("IF THIS IS SHOWING SOMETHING WENT WRONG")
-    owned = StringProperty("IF THIS IS SHOWING SOMETHING WENT WRONG")
-    ads = StringProperty("WRONG ads")
-    ads_price = StringProperty("WRONG price")    # StringProperty("Name: " + "Dummy" + "\n" + "Strength: " + str(Strength))    def buy_ad(self):
-        stats: PlayerStatistics = self.get_data()
-        stats.increment_ads()
-        # update the ad price on the button
-        self.ads_price = str(stats.next_ads_price())
-        # update the text of the number of ads
-        self.ads = str(stats.ads)
-        self.display = str(stats)    def workout(self):
+        return self.manager.get_screen('character').data_stats    display = StringProperty("IF THIS IS SHOWING SOMETHING WENT WRONG")    # StringProperty("Name: " + "Dummy" + "\n" + "Strength: " + str(Strength))    def workout(self):
         stats: PlayerStatistics = self.get_data()
         stats.increment_Strength(1)
         self.display = str(stats)    def read_a_book(self):
@@ -200,10 +115,112 @@ class MyScreenManager(ScreenManager, Widget):
         self.display = str(stats)    def add_time(self, amount):
         stats: PlayerStatistics = self.get_data()
         stats.increment_Time(amount)
-        self.display = str(stats)    def get_paid(self):
-        stats: PlayerStatistics = self.get_data()
-        stats.get_paid()
         self.display = str(stats)class GUIApp(App):    def build(self):
         return MyScreenManager()# Entry point into the game
 if __name__ == '__main__':
     GUIApp().run()
+
+
+    class Dataimporter():
+        def __init__(self, string):
+            self.data = self.convertStringtoDict(string) @ staticmethod
+
+        def convertStringtoDict(string: str) -> dict:
+            """ I am given a string that contains text then a colon, then text then a colon then text
+                I want to turn that into a dictionary"""
+            string = string.replace("{", "")
+            string = string.replace('}', "")
+            string = string.replace("'", "")
+            List = string.split(',')
+            Dict = {}
+            for element in List:
+                (key, value) = element.split(':')
+                Dict[key] = value
+            print(Dict)
+            return Dict @ staticmethod
+
+        def convertDicttoString(data: dict) -> str:
+            """ I am given a Dictionary that I want to convert into a String that contains text then a colon, then text then a colon then text
+                where the text is a key and the number is the key's value """
+            return str(data)
+
+            class PlayerData:
+
+        # Init normal values, as well as tracker variables for those values
+        def __init__(self, savedatadict: dict = None):
+            if savedatadict is not None:
+                print(str(savedatadict))
+                # Things I want to save?
+                self.cookies: int = 0
+                self.pointers: int = 0
+                self.name: str = ""
+            else:
+                self.cookies = savedatadict.get('cookies')
+                self.pointers = savedatadict.get('pointers')
+                self.name = savedatadict.get('name')
+
+                def SaveCurrentData(self):
+            data = {'cookies': self.cookies, 'pointers': self.pointers, 'name': self.name}
+            print(data)
+            return dataclass
+            MyScreenManager(ScreenManager, Widget):
+
+        data = ObjectProperty(PlayerData)
+
+        class WelcomeScreen(Screen):
+            instructions = StringProperty(str('''
+        Welcome to the Android's Cookie Clicker Clone! Hope you have a nice time.
+        If it's your first time playing, press the button below to continue.
+        If you wish to load a save, type your save code and continue
+        '''))  # def SaveCurrentData(self):
+
+        #     data = {'cookies': self.cookies, 'pointers': self.pointers, 'name': self.name}
+        #     return data
+        # Unfinished: Later issue
+        def load_or_start_new(self, savedata=''):
+            # For now we always start a new game
+            if savedata != '':
+                self.loadSave(savedata)
+            else:
+                self.createNewSave()
+            pass  # Right now load and new do the same thing, but that might change in the future
+
+        def loadSave(self, data_string: str):
+            dataDict = Dataimporter.convertStringtoDict(data_string)  # Load in save info
+            self.manager.LoadData(dataDict)
+            self.manager.current = 'game'
+            pass
+
+            def createNewSave(self):
+                self.manager.current = 'load'
+
+            pass
+            passclass
+            LoadSaveScreen(Screen):
+
+        defaultText = StringProperty(str('''
+        Type in a name for yourself
+        '''))
+        failText = StringProperty(str('''
+        Give yourself a name to continue to play you absolute dingus
+        '''))
+        data_stats: PlayerData = ObjectProperty(PlayerData)  # Load SaveData here
+
+        def LoadData(self, data: dict):
+            self.data_stats = PlayerData(data)
+            self.manager.get_screen('game').display = str(self.data_stats)
+            self.manager.get_screen('game').pointercosttext = str(self.data_stats.pointerCost)
+            pass  # Create a new save data if text field isn't blank
+
+        def createSaveData(self, username):
+            if username != '':
+                self.data_stats = PlayerData()
+                self.data_stats.setName(username)
+                self.manager.get_screen('game').display = str(self.data_stats)
+                self.manager.get_screen('game').pointercosttext = str(self.data_stats.pointerCost)
+                self.manager.current = 'game'
+            # Display failText until textbox is no longer empty
+            else:
+                self.defaultText = self.failText
+            pass
+            pass
